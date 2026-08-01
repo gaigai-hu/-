@@ -1,0 +1,24 @@
+{
+  "name": "小罗记账本",
+  "short_name": "小罗记账本",
+  "description": "支持多对象收支记录、存款管理、预算管理的记账本",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#4f46e5",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "apple_web_app": {
+    "capable": true,
+    "title": "小罗记账本",
+    "status_bar_style": "default"
+  }
+}
