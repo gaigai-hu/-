@@ -1,5 +1,5 @@
 // Service Worker - 小罗记账本 离线缓存
-const CACHE_NAME = "xiaoluo-accounting-v8";
+const CACHE_NAME = "xiaoluo-accounting-v9";
 const ASSETS = [
   "./",
   "./index.html",

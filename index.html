@@ -895,13 +895,27 @@ function renderHome() {
   const monthRecords = db.records.filter(r => isSameMonth(r.date, state.currentMonth));
   const income = monthRecords.filter(r=>r.type==='income').reduce((s,r)=>s+parseFloat(r.amount),0);
   const expense = monthRecords.filter(r=>r.type==='expense').reduce((s,r)=>s+parseFloat(r.amount),0);
-  const balance = income - expense;
+
+  // 分对象结余
+  const memberBalance = db.members.map(m => {
+    const mi = monthRecords.filter(r=>r.memberId===m.id&&r.type==='income').reduce((s,r)=>s+parseFloat(r.amount),0);
+    const me = monthRecords.filter(r=>r.memberId===m.id&&r.type==='expense').reduce((s,r)=>s+parseFloat(r.amount),0);
+    return {name:m.name, color:m.color, income:mi, expense:me, balance:mi-me};
+  });
+
   document.getElementById('overviewCard').innerHTML = `
-    <div class="label">本月结余</div>
-    <div class="amount"><small>¥</small>${fmtMoney(balance)}</div>
     <div class="row">
       <div><div class="label">收入</div><div class="amount income-amount"><small>¥</small>${fmtMoney(income)}</div></div>
       <div><div class="label">支出</div><div class="amount expense-amount"><small>¥</small>${fmtMoney(expense)}</div></div>
+    </div>
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+      <div class="label" style="margin-bottom:4px">分对象结余</div>
+      ${memberBalance.map(m => `
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:2px 0">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:${m.color};display:inline-block"></span>${m.name}</span>
+          <span style="font-weight:600;color:${m.balance>=0?'var(--income)':'var(--expense)'}">¥${fmtMoney(m.balance)}</span>
+        </div>
+      `).join('')}
     </div>
   `;
 
@@ -996,11 +1010,26 @@ function renderStats() {
   const income = records.filter(r=>r.type==='income').reduce((s,r)=>s+parseFloat(r.amount),0);
   const expense = records.filter(r=>r.type==='expense').reduce((s,r)=>s+parseFloat(r.amount),0);
 
+  // 分对象结余
+  const memberBalance = db.members.map(m => {
+    const mi = records.filter(r=>r.memberId===m.id&&r.type==='income').reduce((s,r)=>s+parseFloat(r.amount),0);
+    const me = records.filter(r=>r.memberId===m.id&&r.type==='expense').reduce((s,r)=>s+parseFloat(r.amount),0);
+    return {name:m.name, color:m.color, balance:mi-me};
+  });
+
   const summary = `
     <div class="summary-row">
       <div class="summary-card income"><div class="label">收入</div><div class="value">¥${fmtMoney(income)}</div></div>
       <div class="summary-card expense"><div class="label">支出</div><div class="value">¥${fmtMoney(expense)}</div></div>
-      <div class="summary-card balance"><div class="label">结余</div><div class="value">¥${fmtMoney(income-expense)}</div></div>
+    </div>
+    <div style="margin:8px 0;padding:8px 12px;background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+      <div style="font-size:11px;color:var(--text-light);margin-bottom:4px">分对象结余</div>
+      ${memberBalance.map(m => `
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:2px 0">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:${m.color};display:inline-block"></span>${m.name}</span>
+          <span style="font-weight:600;color:${m.balance>=0?'var(--income)':'var(--expense)'}">¥${fmtMoney(m.balance)}</span>
+        </div>
+      `).join('')}
     </div>`;
 
   if (records.length === 0 && state.statTab !== 'trend') {
@@ -1869,7 +1898,7 @@ function init() {
     if (window.caches) {
       caches.keys().then(keys => {
         keys.forEach(k => {
-          if (k !== 'xiaoluo-accounting-v8') {
+          if (k !== 'xiaoluo-accounting-v9') {
             console.log('清理旧缓存:', k);
             caches.delete(k);
           }
